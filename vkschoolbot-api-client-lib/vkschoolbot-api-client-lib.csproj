@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <RootNamespace>SchoolBotAPI</RootNamespace>
-    <Version>0.1.0.7</Version>
+    <Version>0.1.0.17</Version>
     <Company>KriseevM</Company>
     <Product>vkschoolbot API client class library</Product>
     <Description>Simple library for working with vkschoolbot API from the client side</Description>
