@@ -28,7 +28,26 @@ namespace SchoolBotAPI
         }
 
         
+        public async Task<ChangesData> GetChangesAsync()
+        {
+            string url = $"{api_base_url}/getChanges.php?key={key}";
+            var request = GetRequestAsync(new Uri(url));
+            string successJsonSchema = @"{
+                'description': 'Changes data',
+                'type':'object',
+                'properties':
+                {
+                    'TextChanges': {'type':'string', 'required':true},
+                    'NumericChanges':{'type':'array', 'items':{'type':'integer'}, 'required':true}
+                }
+            }";
 
+            JSchema schema = JSchema.Parse(successJsonSchema);
+            var result = JObject.Parse(await request);
+
+            var finalRes = ValidateMethodOutput<ChangesData>(schema, result);
+            return finalRes;
+        }
         public async Task<HomeworkData> GetHomeworkAsync(int ID)
         {
             string url = $"{api_base_url}/getHomework.php?id={ID}&key={key}";
