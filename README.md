@@ -1,5 +1,5 @@
 # vkschoolbot-api-client-lib
-<p>Небольшая библиотека для создания клиентских приложений для работы с api бота <a href="https://github.com/KriseevM/vkschoolbot">vkschoolbot</a>
+<p>Небольшая библиотека для создания клиентских приложений для работы с API бота <a href="https://github.com/KriseevM/vkschoolbot">vkschoolbot</a>
 </p>
 <p><b>Библиотека предназначена для платформы .Net Core 2.1 и выше</b>. Для установки библиотеки необходимо установить Nuget-пакеты Newtonsoft.Json и Newtonsoft.Json.Schema, а затем просто подключить dll, загруженный <a href="https://github.com/KriseevM/vkschoolbot-api-client-lib/releases">отсюда</a>.
 </p>
