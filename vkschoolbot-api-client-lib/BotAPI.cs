@@ -43,9 +43,7 @@ namespace SchoolBotAPI
                     'Homework':{'type':'string', 'required':true}
                 }
             }";
-            Console.WriteLine("aa");
             JSchema schema = JSchema.Parse(successJsonSchema);
-            Console.WriteLine("aa");
             string json = (await request).Replace('"', '\'');
             Console.WriteLine(json);
             var result = JObject.Parse(json);
@@ -57,7 +55,7 @@ namespace SchoolBotAPI
 
         private T ValidateMethodOutput<T>(JSchema schema, JObject result)
         {
-            Console.WriteLine(result.IsValid(schema));
+            
             if (result.IsValid(schema))
             {
                 return result.ToObject<T>();
