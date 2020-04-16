@@ -107,8 +107,7 @@ namespace SchoolBotAPI
 
             JSchema schema = JSchema.Parse(successJsonSchema);
             JObject result = JObject.Parse(await request);
-            key = ValidateMethodOutput<KeyValuePair<string, string>>(schema, result).Value;
-
+            key = ValidateMethodOutput<Dictionary<string, string>>(schema, result)["key"];
         }
 
         private static void handleError(string error, int errorcode)
