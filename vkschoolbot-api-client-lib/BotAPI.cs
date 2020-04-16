@@ -43,13 +43,12 @@ namespace SchoolBotAPI
                     'Homework':{'type':'string', 'required':true}
                 }
             }";
-            JSchema schema = JSchema.Parse(successJsonSchema);
-            string json = (await request).Replace('"', '\'');
-            Console.WriteLine(json);
-            var result = JObject.Parse(json);
             
-            var a = ValidateMethodOutput<HomeworkData>(schema, result);
-            return a;
+            JSchema schema = JSchema.Parse(successJsonSchema);
+            var result = JObject.Parse(await request);
+            
+            var finalRes = ValidateMethodOutput<HomeworkData>(schema, result);
+            return finalRes;
 
         }
 
