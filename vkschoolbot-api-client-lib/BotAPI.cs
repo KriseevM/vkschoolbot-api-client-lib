@@ -27,12 +27,33 @@ namespace SchoolBotAPI
 
         }
 
-        
+        public async Task<Dictionary<int, string>> GetSubjectsAsync()
+        {
+            string url = $"{apiBaseUrl}/getSubjects.php?key={key}";
+            var request = GetRequestAsync(new Uri(url));
+            string successJsonSchema = 
+            @"{
+                'description': 'Subjects',
+                'type':'object',
+                'patternProperties':
+                {
+                    '^\\d+$': {'type':'string'}
+                },
+                'additionalProperties': false
+            }";
+
+            JSchema schema = JSchema.Parse(successJsonSchema);
+            var result = JObject.Parse(await request);
+
+            var finalRes = ValidateMethodOutput<Dictionary<int, string>>(schema, result);
+            return finalRes;
+        } 
         public async Task<ChangesData> GetChangesAsync()
         {
             string url = $"{apiBaseUrl}/getChanges.php?key={key}";
             var request = GetRequestAsync(new Uri(url));
-            string successJsonSchema = @"{
+            string successJsonSchema = 
+            @"{
                 'description': 'Changes data',
                 'type':'object',
                 'properties':
@@ -52,7 +73,8 @@ namespace SchoolBotAPI
         {
             string url = $"{apiBaseUrl}/getHomework.php?id={ID}&key={key}";
             var request = GetRequestAsync(new Uri(url));
-            string successJsonSchema = @"{
+            string successJsonSchema = 
+            @"{
                 'description': 'Homework data',
                 'type':'object',
                 'properties':
@@ -81,15 +103,16 @@ namespace SchoolBotAPI
             else
             {
                 
-                string errorJsonSchema = @"{
-    'description':'Error',
-    'type':'object',
-    'properties':
-    {
-       'error':{'type':'string', 'required':true},
-       'errorcode':{'type':'integer', 'required':true}
-    }
-}";
+                string errorJsonSchema = 
+                @"{
+                    'description':'Error',
+                    'type':'object',
+                    'properties':
+                    {
+                        'error':{'type':'string', 'required':true},
+                        'errorcode':{'type':'integer', 'required':true}
+                    }
+                }";
                 JSchema errorSchema = JSchema.Parse(errorJsonSchema);
                 if (result.IsValid(errorSchema))
                 {
@@ -112,7 +135,8 @@ namespace SchoolBotAPI
             });
 
             var request = PostRequestAsync("/auth.php", content);
-            string successJsonSchema = @"{
+            string successJsonSchema = 
+            @"{
                 'description': 'Homework data',
                 'type':'object',
                 'properties':
