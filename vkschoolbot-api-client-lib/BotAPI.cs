@@ -13,24 +13,24 @@ namespace SchoolBotAPI
     public class BotAPI
     {
         private string key;
-        private string api_base_url;
+        private string apiBaseUrl;
         HttpClient client;
         /// <summary>
         /// Создание объекта API и авторизация
         /// </summary>
-        /// <param name="api_base_url">Базовый URL API. Методы будут вызываться по адресу api_url/method</param>
-        public BotAPI(string api_base_url)
+        /// <param name="apiBaseUrl">Базовый URL API. Методы будут вызываться по адресу apiBaseUrl/method</param>
+        public BotAPI(string apiBaseUrl)
         {
 
             client = new HttpClient();
-            this.api_base_url = api_base_url;
+            this.apiBaseUrl = apiBaseUrl;
 
         }
 
         
         public async Task<ChangesData> GetChangesAsync()
         {
-            string url = $"{api_base_url}/getChanges.php?key={key}";
+            string url = $"{apiBaseUrl}/getChanges.php?key={key}";
             var request = GetRequestAsync(new Uri(url));
             string successJsonSchema = @"{
                 'description': 'Changes data',
@@ -50,7 +50,7 @@ namespace SchoolBotAPI
         }
         public async Task<HomeworkData> GetHomeworkAsync(int ID)
         {
-            string url = $"{api_base_url}/getHomework.php?id={ID}&key={key}";
+            string url = $"{apiBaseUrl}/getHomework.php?id={ID}&key={key}";
             var request = GetRequestAsync(new Uri(url));
             string successJsonSchema = @"{
                 'description': 'Homework data',
@@ -132,6 +132,7 @@ namespace SchoolBotAPI
             {
                 case 1:
                 case 2:
+                case 8:
                     throw new ServerException(error);
                 case 3:
                 case 4:
@@ -149,7 +150,7 @@ namespace SchoolBotAPI
         private async Task<string> PostRequestAsync(string url, FormUrlEncodedContent content)
         {
             
-            var result = await client.PostAsync(api_base_url+url, content);
+            var result = await client.PostAsync(apiBaseUrl+url, content);
             string data = await result.Content.ReadAsStringAsync();
             
             result.EnsureSuccessStatusCode();
@@ -159,7 +160,7 @@ namespace SchoolBotAPI
         }
         private async Task<string> GetRequestAsync(string url)
         {
-            var result = await client.GetAsync(api_base_url + url);
+            var result = await client.GetAsync(apiBaseUrl + url);
             string data = await result.Content.ReadAsStringAsync();
 
             result.EnsureSuccessStatusCode();
@@ -175,5 +176,6 @@ namespace SchoolBotAPI
 
             return data;
         }
+        
     }
 }
