@@ -121,7 +121,7 @@ namespace SchoolBotAPI
                 }
                 else
                 {
-                    throw new BotAPIException("Не удалось обработать ответ сервера");
+                    throw new BotAPIException("Incorrect server response");
                 }
             }
         }
@@ -166,7 +166,7 @@ namespace SchoolBotAPI
                 case 7:
                     throw new MissingArgumentException(error);
                 default:
-                    throw new BotAPIException("Произошла неизвестная ошибка");
+                    throw new BotAPIException("Unknown error");
 
             }
         }
