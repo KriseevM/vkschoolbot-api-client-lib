@@ -68,6 +68,27 @@ namespace SchoolBotAPI
 
             ValidateMethodOutput(schema, result);
         }
+        public async Task UpdateScheduleAsync(ScheduleData newSchedule)
+        {
+            string url = $"/updateSchedule.php";
+            JObject contentJObject = JObject.FromObject(newSchedule);
+            contentJObject.Add("key", key);
+            StringContent content = new StringContent(contentJObject.ToString(), Encoding.UTF8, "application/json");
+            var request = PostRequestAsync(url, content);
+            string successJsonSchema = 
+            @"{
+                'description': 'Subjects',
+                'type':'object',
+                'properties':
+                {
+                    'result': {'type':'boolean', required: true}
+                }
+            }";
+            JSchema schema = JSchema.Parse(successJsonSchema);
+            var result = JObject.Parse(await request);
+
+            ValidateMethodOutput(schema, result);
+        }
         public async Task<ScheduleData> GetScheduleAsync()
         {
             string url = $"/getSchedule.php?key={key}";
