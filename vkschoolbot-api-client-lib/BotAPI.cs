@@ -137,7 +137,6 @@ namespace SchoolBotAPI
                 'properties':
                 {
                     'ID': {'type':'integer', 'required':true},
-                    'Subject':{'type':'string', 'required':true},
                     'Homework':{'type':'string', 'required':true}
                 }
             }";
