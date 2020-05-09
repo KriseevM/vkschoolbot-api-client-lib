@@ -26,10 +26,31 @@ namespace SchoolBotAPI
             this.apiBaseUrl = apiBaseUrl;
 
         }
+        public async Task UpdateChangesAsync(ChangesData newChanges)
+        {
+            string url = $"/updateChanges.php";
+            JObject contentJObject = JObject.FromObject(newChanges);
+            contentJObject.Add("key", key);
+            StringContent content = new StringContent(contentJObject.ToString(), Encoding.UTF8, "application/json");
+            var request = PostRequestAsync(url, content);
+            string successJsonSchema = 
+            @"{
+                'description': 'Subjects',
+                'type':'object',
+                'properties':
+                {
+                    'result': {'type':'boolean', required: true}
+                }
+            }";
+            JSchema schema = JSchema.Parse(successJsonSchema);
+            var result = JObject.Parse(await request);
+
+            ValidateMethodOutput(schema, result);
+        }
         public async Task<ScheduleData> GetScheduleAsync()
         {
-            string url = $"{apiBaseUrl}/getSchedule.php?key={key}";
-            var request = GetRequestAsync(new Uri(url));
+            string url = $"/getSchedule.php?key={key}";
+            var request = GetRequestAsync(url);
             string successJsonSchema = 
             @"{
                 'description': 'Subjects',
@@ -65,8 +86,8 @@ namespace SchoolBotAPI
         }
         public async Task<Dictionary<int, string>> GetSubjectsAsync()
         {
-            string url = $"{apiBaseUrl}/getSubjects.php?key={key}";
-            var request = GetRequestAsync(new Uri(url));
+            string url = $"/getSubjects.php?key={key}";
+            var request = GetRequestAsync(url);
             string successJsonSchema = 
             @"{
                 'description': 'Subjects',
@@ -86,8 +107,8 @@ namespace SchoolBotAPI
         } 
         public async Task<ChangesData> GetChangesAsync()
         {
-            string url = $"{apiBaseUrl}/getChanges.php?key={key}";
-            var request = GetRequestAsync(new Uri(url));
+            string url = $"/getChanges.php?key={key}";
+            var request = GetRequestAsync(url);
             string successJsonSchema = 
             @"{
                 'description': 'Changes data',
@@ -107,8 +128,8 @@ namespace SchoolBotAPI
         }
         public async Task<HomeworkData> GetHomeworkAsync(int ID)
         {
-            string url = $"{apiBaseUrl}/getHomework.php?id={ID}&key={key}";
-            var request = GetRequestAsync(new Uri(url));
+            string url = $"/getHomework.php?id={ID}&key={key}";
+            var request = GetRequestAsync(url);
             string successJsonSchema = 
             @"{
                 'description': 'Homework data',
@@ -154,6 +175,34 @@ namespace SchoolBotAPI
                 {
                     handleError((string)result.GetValue("error"), (int)result.GetValue("errorcode"));
                     return default(T);
+                }
+                else
+                {
+                    throw new BotAPIException("Incorrect server response");
+                }
+            }
+        }
+        private void ValidateMethodOutput(JSchema schema, JObject result)
+        {
+            
+            if (!result.IsValid(schema))
+            {
+                
+                string errorJsonSchema = 
+                @"{
+                    'description':'Error',
+                    'type':'object',
+                    'properties':
+                    {
+                        'error':{'type':'string', 'required':true},
+                        'errorcode':{'type':'integer', 'required':true}
+                    }
+                }";
+                JSchema errorSchema = JSchema.Parse(errorJsonSchema);
+                if (result.IsValid(errorSchema))
+                {
+                    handleError((string)result.GetValue("error"), (int)result.GetValue("errorcode"));
+                    
                 }
                 else
                 {
@@ -207,7 +256,7 @@ namespace SchoolBotAPI
             }
         }
 
-        private async Task<string> PostRequestAsync(string url, FormUrlEncodedContent content)
+        private async Task<string> PostRequestAsync(string url, HttpContent content)
         {
             
             var result = await client.PostAsync(apiBaseUrl+url, content);
@@ -227,15 +276,5 @@ namespace SchoolBotAPI
 
             return data;
         }
-        private async Task<string> GetRequestAsync(Uri uri)
-        {
-            var result = await client.GetAsync(uri);
-            string data = await result.Content.ReadAsStringAsync();
-
-            result.EnsureSuccessStatusCode();
-
-            return data;
-        }
-        
     }
 }
