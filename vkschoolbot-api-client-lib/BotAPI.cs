@@ -35,7 +35,7 @@ namespace SchoolBotAPI
             var request = PostRequestAsync(url, content);
             string successJsonSchema = 
             @"{
-                'description': 'Subjects',
+                'description': 'Successful Update',
                 'type':'object',
                 'properties':
                 {
@@ -56,7 +56,7 @@ namespace SchoolBotAPI
             var request = PostRequestAsync(url, content);
             string successJsonSchema = 
             @"{
-                'description': 'Subjects',
+                'description': 'Successful Update',
                 'type':'object',
                 'properties':
                 {
@@ -77,7 +77,7 @@ namespace SchoolBotAPI
             var request = PostRequestAsync(url, content);
             string successJsonSchema = 
             @"{
-                'description': 'Subjects',
+                'description': 'Successful Update',
                 'type':'object',
                 'properties':
                 {
@@ -95,7 +95,7 @@ namespace SchoolBotAPI
             var request = GetRequestAsync(url);
             string successJsonSchema = 
             @"{
-                'description': 'Subjects',
+                'description': 'Schedule data',
                 'type':'object',
                 'properties':
                 {
@@ -263,7 +263,7 @@ namespace SchoolBotAPI
             var request = PostRequestAsync("/auth.php", content);
             string successJsonSchema = 
             @"{
-                'description': 'Homework data',
+                'description': 'Key (Auth result)',
                 'type':'object',
                 'properties':
                 {
