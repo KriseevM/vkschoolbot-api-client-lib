@@ -289,6 +289,7 @@ namespace SchoolBotAPI
                 case 4:
                 case 5:
                 case 6:
+                case 9:
                     throw new AuthenticationException(error);
                 case 7:
                     throw new MissingArgumentException(error);
