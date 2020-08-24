@@ -26,26 +26,23 @@ namespace SchoolBotAPI
             this.apiBaseUrl = apiBaseUrl;
 
         }
-        public async Task UpdateChangesAsync(ChangesData newChanges)
+        public async Task<bool> UpdateChangesAsync(ChangesData newChanges)
         {
             string url = $"/updateChanges.php";
-            JObject contentJObject = JObject.FromObject(newChanges);
-            contentJObject.Add("key", key);
-            StringContent content = new StringContent(contentJObject.ToString(), Encoding.UTF8, "application/json");
+            StringContent content = new StringContent(JsonConvert.SerializeObject(newChanges), Encoding.UTF8, "application/json");
             var request = PostRequestAsync(url, content);
             string successJsonSchema = 
             @"{
-                'description': 'Successful Update',
                 'type':'object',
                 'properties':
                 {
-                    'result': {'type':'boolean', required: true}
+                    'updated': {'type':'boolean', required: true}
                 }
             }";
             JSchema schema = JSchema.Parse(successJsonSchema);
             var result = JObject.Parse(await request);
-
             ValidateMethodOutput(schema, result);
+            return result.Value<bool>("updated");
         }
         public async Task UpdateHomeworkAsync(HomeworkData newHomework)
         {
