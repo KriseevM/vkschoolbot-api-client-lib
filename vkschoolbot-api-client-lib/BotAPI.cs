@@ -187,7 +187,27 @@ namespace SchoolBotAPI
             return finalRes;
 
         }
-
+        public async Task<int> AddSubjectsAsync(params string[] subjectNames)
+        {
+            string url = $"/addSubjects.php";
+            JObject contentJObject = new JObject();
+            contentJObject.Add("names", JArray.FromObject(subjectNames));
+            string contentString = contentJObject.ToString();
+            StringContent content = new StringContent(contentString, Encoding.UTF8, "application/json");
+            var request = PostRequestAsync(url, content);
+            string successJsonSchema =
+            @"{
+                'type':'object',
+                'properties':
+                {
+                    'added_subjects': {'type':'integer', required: true}
+                }
+            }";
+            JSchema schema = JSchema.Parse(successJsonSchema);
+            var result = JObject.Parse(await request);
+            ValidateMethodOutput(schema, result);
+            return result.Value<int>("added_subjects"); 
+        }
         private T ValidateMethodOutput<T>(JSchema schema, JObject result)
         {
             
@@ -248,7 +268,6 @@ namespace SchoolBotAPI
                 }
             }
         }
-
         public async Task AuthAsync(string username, string password)
         {
             var content = new FormUrlEncodedContent(new[]
