@@ -208,7 +208,29 @@ namespace SchoolBotAPI
             ValidateMethodOutput(schema, result);
             return result.Value<int>("added_subjects"); 
         }
-        private T ValidateMethodOutput<T>(JSchema schema, JObject result)
+        public async Task<int> DeleteSubjectsAsync(params int[] subjectIDs)
+        {
+            string url = $"/deleteSubjects.php";
+            JObject contentJObject = new JObject();
+            contentJObject.Add("IDs", JArray.FromObject(subjectIDs));
+            string contentString = contentJObject.ToString();
+            StringContent content = new StringContent(contentString, Encoding.UTF8, "application/json");
+            var request = PostRequestAsync(url, content);
+            string successJsonSchema =
+            @"{
+                'type':'object',
+                'properties':
+                {
+                    'deleted_subjects': {'type':'integer', required: true}
+                }
+            }";
+            JSchema schema = JSchema.Parse(successJsonSchema);
+            var result = JObject.Parse(await request);
+            ValidateMethodOutput(schema, result);
+            return result.Value<int>("deleted_subjects");
+        }
+
+        private T ValidateMethodOutput<T>(JSchema schema, JContainer result)
         {
             
             if (result.IsValid(schema))
@@ -220,7 +242,6 @@ namespace SchoolBotAPI
                 
                 string errorJsonSchema = 
                 @"{
-                    'description':'Error',
                     'type':'object',
                     'properties':
                     {
@@ -231,7 +252,7 @@ namespace SchoolBotAPI
                 JSchema errorSchema = JSchema.Parse(errorJsonSchema);
                 if (result.IsValid(errorSchema))
                 {
-                    handleError((string)result.GetValue("error"), (int)result.GetValue("errorcode"));
+                    handleError((string)((JObject)result).GetValue("error"), (int)((JObject)result).GetValue("errorcode"));
                     return default(T);
                 }
                 else
@@ -240,7 +261,7 @@ namespace SchoolBotAPI
                 }
             }
         }
-        private void ValidateMethodOutput(JSchema schema, JObject result)
+        private void ValidateMethodOutput(JSchema schema, JContainer result)
         {
             
             if (!result.IsValid(schema))
@@ -248,7 +269,6 @@ namespace SchoolBotAPI
                 
                 string errorJsonSchema = 
                 @"{
-                    'description':'Error',
                     'type':'object',
                     'properties':
                     {
@@ -259,7 +279,7 @@ namespace SchoolBotAPI
                 JSchema errorSchema = JSchema.Parse(errorJsonSchema);
                 if (result.IsValid(errorSchema))
                 {
-                    handleError((string)result.GetValue("error"), (int)result.GetValue("errorcode"));
+                    handleError((string)((JObject)result).GetValue("error"), (int)((JObject)result).GetValue("errorcode"));
                     
                 }
                 else
