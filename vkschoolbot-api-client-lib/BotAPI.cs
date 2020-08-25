@@ -123,25 +123,33 @@ namespace SchoolBotAPI
             var finalRes = ValidateMethodOutput<ScheduleData>(schema, result);
             return finalRes;
         }
-        public async Task<Dictionary<int, string>> GetSubjectsAsync()
+        public async Task<SubjectListEntry[]> GetSubjectsAsync()
         {
-            string url = $"/getSubjects.php?key={key}";
+            string url = $"/getSubjects.php";
             var request = GetRequestAsync(url);
             string successJsonSchema = 
             @"{
-                'description': 'Subjects',
-                'type':'object',
-                'patternProperties':
+                'type':'array',
+                'items':
                 {
-                    '^\\d+$': {'type':'string'}
-                },
-                'additionalProperties': false
+                    'type':'object',
+                    'properties': {
+                        'ID': {
+                            'type':'integer',
+                            'required':true
+                        },
+                        'Name': {
+                            'type': 'string',
+                            'required': true
+                        }
+                    }
+                }
             }";
 
             JSchema schema = JSchema.Parse(successJsonSchema);
-            var result = JObject.Parse(await request);
+            var result = JArray.Parse(await request);
 
-            var finalRes = ValidateMethodOutput<Dictionary<int, string>>(schema, result);
+            var finalRes = ValidateMethodOutput<SubjectListEntry[]>(schema, result);
             return finalRes;
         } 
         public async Task<ChangesData> GetChangesAsync()
