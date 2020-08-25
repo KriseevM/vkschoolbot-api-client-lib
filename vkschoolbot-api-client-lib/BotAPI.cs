@@ -234,7 +234,46 @@ namespace SchoolBotAPI
             ValidateMethodOutput(schema, result);
             return result.Value<int>("deleted_subjects");
         }
-
+        public async Task<bool> AddUserAsync(string user, string pass, int pr_level)
+        {
+            string url = $"/addUser.php";
+            JObject contentJObject = new JObject();
+            contentJObject.Add("user", user);
+            contentJObject.Add("pass", pass);
+            contentJObject.Add("pr", pr_level);
+            string contentString = contentJObject.ToString();
+            StringContent content = new StringContent(contentString, Encoding.UTF8, "application/json");
+            var request = PostRequestAsync(url, content);
+            string successJsonSchema =
+            @"{
+                'type':'object',
+                'properties':
+                {
+                    'added': {'type':'boolean', required: true}
+                }
+            }";
+            JSchema schema = JSchema.Parse(successJsonSchema);
+            var result = JObject.Parse(await request);
+            ValidateMethodOutput(schema, result);
+            return result.Value<bool>("added");
+        }
+        public async Task<bool> DeleteUserAsync(string user)
+        {
+            string url = $"/deleteUser.php?user={user}";
+            var request = GetRequestAsync(url);
+            string successJsonSchema =
+            @"{
+                'type':'object',
+                'properties':
+                {
+                    'deleted': {'type':'boolean', required: true}
+                }
+            }";
+            JSchema schema = JSchema.Parse(successJsonSchema);
+            var result = JObject.Parse(await request);
+            ValidateMethodOutput(schema, result);
+            return result.Value<bool>("added");
+        }
         private T ValidateMethodOutput<T>(JSchema schema, JContainer result)
         {
             
