@@ -44,28 +44,26 @@ namespace SchoolBotAPI
             ValidateMethodOutput(schema, result);
             return result.Value<bool>("updated");
         }
-        public async Task UpdateHomeworkAsync(HomeworkData newHomework)
+        public async Task<bool> UpdateHomeworkAsync(HomeworkData newHomework)
         {
             string url = $"/updateHomework.php";
             JObject contentJObject = JObject.FromObject(newHomework);
-            contentJObject.Add("key", key);
             StringContent content = new StringContent(contentJObject.ToString(), Encoding.UTF8, "application/json");
             var request = PostRequestAsync(url, content);
             string successJsonSchema = 
             @"{
-                'description': 'Successful Update',
                 'type':'object',
                 'properties':
                 {
-                    'result': {'type':'boolean', required: true}
+                    'updated': {'type':'boolean', required: true}
                 }
             }";
             JSchema schema = JSchema.Parse(successJsonSchema);
             var result = JObject.Parse(await request);
-
             ValidateMethodOutput(schema, result);
+            return result.Value<bool>("updated");
         }
-        public async Task UpdateScheduleAsync(ScheduleData newSchedule)
+        public async Task<bool> UpdateTimetableAsync(TimetableData newSchedule)
         {
             string url = $"/updateSchedule.php";
             JObject contentJObject = JObject.FromObject(newSchedule);
@@ -78,25 +76,24 @@ namespace SchoolBotAPI
                 'type':'object',
                 'properties':
                 {
-                    'result': {'type':'boolean', required: true}
+                    'updated': {'type':'boolean', required: true}
                 }
             }";
             JSchema schema = JSchema.Parse(successJsonSchema);
             var result = JObject.Parse(await request);
-
             ValidateMethodOutput(schema, result);
+            return result.Value<bool>("updated");
         }
-        public async Task<ScheduleData> GetScheduleAsync()
+        public async Task<TimetableData> GetTimetableAsync()
         {
-            string url = $"/getSchedule.php?key={key}";
+            string url = $"/getSchedule.php";
             var request = GetRequestAsync(url);
             string successJsonSchema = 
             @"{
-                'description': 'Schedule data',
                 'type':'object',
                 'properties':
                 {
-                    'NumericSchedule':
+                    'NumericTimetable':
                     {
                         'type': 'array',
                         'items':
@@ -108,7 +105,7 @@ namespace SchoolBotAPI
                         },
                         'required':true
                     },
-                    'TextSchedule':
+                    'TextTimetable':
                     {
                         'type':'array',
                         'items':{'type':'string'}, 
@@ -120,7 +117,7 @@ namespace SchoolBotAPI
             JSchema schema = JSchema.Parse(successJsonSchema);
             var result = JObject.Parse(await request);
 
-            var finalRes = ValidateMethodOutput<ScheduleData>(schema, result);
+            var finalRes = ValidateMethodOutput<TimetableData>(schema, result);
             return finalRes;
         }
         public async Task<SubjectListEntry[]> GetSubjectsAsync()
