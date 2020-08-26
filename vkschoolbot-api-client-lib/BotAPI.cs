@@ -47,8 +47,7 @@ namespace SchoolBotAPI
         public async Task<bool> UpdateHomeworkAsync(HomeworkData newHomework)
         {
             string url = $"/updateHomework.php";
-            JObject contentJObject = JObject.FromObject(newHomework);
-            StringContent content = new StringContent(contentJObject.ToString(), Encoding.UTF8, "application/json");
+            StringContent content = new StringContent(JsonConvert.SerializeObject(newHomework), Encoding.UTF8, "application/json");
             var request = PostRequestAsync(url, content);
             string successJsonSchema = 
             @"{
@@ -63,16 +62,13 @@ namespace SchoolBotAPI
             ValidateMethodOutput(schema, result);
             return result.Value<bool>("updated");
         }
-        public async Task<bool> UpdateTimetableAsync(TimetableData newSchedule)
+        public async Task<bool> UpdateTimetableAsync(TimetableData newTimetable)
         {
             string url = $"/updateSchedule.php";
-            JObject contentJObject = JObject.FromObject(newSchedule);
-            contentJObject.Add("key", key);
-            StringContent content = new StringContent(contentJObject.ToString(), Encoding.UTF8, "application/json");
+            StringContent content = new StringContent(JsonConvert.SerializeObject(newTimetable), Encoding.UTF8, "application/json");
             var request = PostRequestAsync(url, content);
             string successJsonSchema = 
             @"{
-                'description': 'Successful Update',
                 'type':'object',
                 'properties':
                 {
@@ -116,7 +112,6 @@ namespace SchoolBotAPI
 
             JSchema schema = JSchema.Parse(successJsonSchema);
             var result = JObject.Parse(await request);
-
             var finalRes = ValidateMethodOutput<TimetableData>(schema, result);
             return finalRes;
         }
@@ -145,13 +140,12 @@ namespace SchoolBotAPI
 
             JSchema schema = JSchema.Parse(successJsonSchema);
             var result = JArray.Parse(await request);
-
             var finalRes = ValidateMethodOutput<SubjectListEntry[]>(schema, result);
             return finalRes;
         } 
         public async Task<ChangesData> GetChangesAsync()
         {
-            string url = $"/getChanges.php?key={key}";
+            string url = $"/getChanges.php";
             var request = GetRequestAsync(url);
             string successJsonSchema = 
             @"{
@@ -172,7 +166,7 @@ namespace SchoolBotAPI
         }
         public async Task<HomeworkData> GetHomeworkAsync(int ID)
         {
-            string url = $"/getHomework.php?id={ID}&key={key}";
+            string url = $"/getHomework.php?id={ID}";
             var request = GetRequestAsync(url);
             string successJsonSchema = 
             @"{
