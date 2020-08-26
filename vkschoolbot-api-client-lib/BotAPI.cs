@@ -26,80 +26,70 @@ namespace SchoolBotAPI
             this.apiBaseUrl = apiBaseUrl;
 
         }
-        public async Task UpdateChangesAsync(ChangesData newChanges)
+        public async Task<bool> UpdateChangesAsync(ChangesData newChanges)
         {
             string url = $"/updateChanges.php";
-            JObject contentJObject = JObject.FromObject(newChanges);
-            contentJObject.Add("key", key);
-            StringContent content = new StringContent(contentJObject.ToString(), Encoding.UTF8, "application/json");
+            StringContent content = new StringContent(JsonConvert.SerializeObject(newChanges), Encoding.UTF8, "application/json");
             var request = PostRequestAsync(url, content);
             string successJsonSchema = 
             @"{
-                'description': 'Successful Update',
                 'type':'object',
                 'properties':
                 {
-                    'result': {'type':'boolean', required: true}
+                    'updated': {'type':'boolean', required: true}
                 }
             }";
             JSchema schema = JSchema.Parse(successJsonSchema);
             var result = JObject.Parse(await request);
-
             ValidateMethodOutput(schema, result);
+            return result.Value<bool>("updated");
         }
-        public async Task UpdateHomeworkAsync(HomeworkData newHomework)
+        public async Task<bool> UpdateHomeworkAsync(HomeworkData newHomework)
         {
             string url = $"/updateHomework.php";
-            JObject contentJObject = JObject.FromObject(newHomework);
-            contentJObject.Add("key", key);
-            StringContent content = new StringContent(contentJObject.ToString(), Encoding.UTF8, "application/json");
+            StringContent content = new StringContent(JsonConvert.SerializeObject(newHomework), Encoding.UTF8, "application/json");
             var request = PostRequestAsync(url, content);
             string successJsonSchema = 
             @"{
-                'description': 'Successful Update',
                 'type':'object',
                 'properties':
                 {
-                    'result': {'type':'boolean', required: true}
+                    'updated': {'type':'boolean', required: true}
                 }
             }";
             JSchema schema = JSchema.Parse(successJsonSchema);
             var result = JObject.Parse(await request);
-
             ValidateMethodOutput(schema, result);
+            return result.Value<bool>("updated");
         }
-        public async Task UpdateScheduleAsync(ScheduleData newSchedule)
+        public async Task<bool> UpdateTimetableAsync(TimetableData newTimetable)
         {
             string url = $"/updateSchedule.php";
-            JObject contentJObject = JObject.FromObject(newSchedule);
-            contentJObject.Add("key", key);
-            StringContent content = new StringContent(contentJObject.ToString(), Encoding.UTF8, "application/json");
+            StringContent content = new StringContent(JsonConvert.SerializeObject(newTimetable), Encoding.UTF8, "application/json");
             var request = PostRequestAsync(url, content);
             string successJsonSchema = 
             @"{
-                'description': 'Successful Update',
                 'type':'object',
                 'properties':
                 {
-                    'result': {'type':'boolean', required: true}
+                    'updated': {'type':'boolean', required: true}
                 }
             }";
             JSchema schema = JSchema.Parse(successJsonSchema);
             var result = JObject.Parse(await request);
-
             ValidateMethodOutput(schema, result);
+            return result.Value<bool>("updated");
         }
-        public async Task<ScheduleData> GetScheduleAsync()
+        public async Task<TimetableData> GetTimetableAsync()
         {
-            string url = $"/getSchedule.php?key={key}";
+            string url = $"/getSchedule.php";
             var request = GetRequestAsync(url);
             string successJsonSchema = 
             @"{
-                'description': 'Schedule data',
                 'type':'object',
                 'properties':
                 {
-                    'NumericSchedule':
+                    'NumericTimetable':
                     {
                         'type': 'array',
                         'items':
@@ -111,7 +101,7 @@ namespace SchoolBotAPI
                         },
                         'required':true
                     },
-                    'TextSchedule':
+                    'TextTimetable':
                     {
                         'type':'array',
                         'items':{'type':'string'}, 
@@ -122,34 +112,40 @@ namespace SchoolBotAPI
 
             JSchema schema = JSchema.Parse(successJsonSchema);
             var result = JObject.Parse(await request);
-
-            var finalRes = ValidateMethodOutput<ScheduleData>(schema, result);
+            var finalRes = ValidateMethodOutput<TimetableData>(schema, result);
             return finalRes;
         }
-        public async Task<Dictionary<int, string>> GetSubjectsAsync()
+        public async Task<SubjectListEntry[]> GetSubjectsAsync()
         {
-            string url = $"/getSubjects.php?key={key}";
+            string url = $"/getSubjects.php";
             var request = GetRequestAsync(url);
             string successJsonSchema = 
             @"{
-                'description': 'Subjects',
-                'type':'object',
-                'patternProperties':
+                'type':'array',
+                'items':
                 {
-                    '^\\d+$': {'type':'string'}
-                },
-                'additionalProperties': false
+                    'type':'object',
+                    'properties': {
+                        'ID': {
+                            'type':'integer',
+                            'required':true
+                        },
+                        'Name': {
+                            'type': 'string',
+                            'required': true
+                        }
+                    }
+                }
             }";
 
             JSchema schema = JSchema.Parse(successJsonSchema);
-            var result = JObject.Parse(await request);
-
-            var finalRes = ValidateMethodOutput<Dictionary<int, string>>(schema, result);
+            var result = JArray.Parse(await request);
+            var finalRes = ValidateMethodOutput<SubjectListEntry[]>(schema, result);
             return finalRes;
         } 
         public async Task<ChangesData> GetChangesAsync()
         {
-            string url = $"/getChanges.php?key={key}";
+            string url = $"/getChanges.php";
             var request = GetRequestAsync(url);
             string successJsonSchema = 
             @"{
@@ -170,7 +166,7 @@ namespace SchoolBotAPI
         }
         public async Task<HomeworkData> GetHomeworkAsync(int ID)
         {
-            string url = $"/getHomework.php?id={ID}&key={key}";
+            string url = $"/getHomework.php?id={ID}";
             var request = GetRequestAsync(url);
             string successJsonSchema = 
             @"{
@@ -190,8 +186,89 @@ namespace SchoolBotAPI
             return finalRes;
 
         }
-
-        private T ValidateMethodOutput<T>(JSchema schema, JObject result)
+        public async Task<int> AddSubjectsAsync(params string[] subjectNames)
+        {
+            string url = $"/addSubjects.php";
+            JObject contentJObject = new JObject();
+            contentJObject.Add("names", JArray.FromObject(subjectNames));
+            string contentString = contentJObject.ToString();
+            StringContent content = new StringContent(contentString, Encoding.UTF8, "application/json");
+            var request = PostRequestAsync(url, content);
+            string successJsonSchema =
+            @"{
+                'type':'object',
+                'properties':
+                {
+                    'added_subjects': {'type':'integer', required: true}
+                }
+            }";
+            JSchema schema = JSchema.Parse(successJsonSchema);
+            var result = JObject.Parse(await request);
+            ValidateMethodOutput(schema, result);
+            return result.Value<int>("added_subjects"); 
+        }
+        public async Task<int> DeleteSubjectsAsync(params int[] subjectIDs)
+        {
+            string url = $"/deleteSubjects.php";
+            JObject contentJObject = new JObject();
+            contentJObject.Add("IDs", JArray.FromObject(subjectIDs));
+            string contentString = contentJObject.ToString();
+            StringContent content = new StringContent(contentString, Encoding.UTF8, "application/json");
+            var request = PostRequestAsync(url, content);
+            string successJsonSchema =
+            @"{
+                'type':'object',
+                'properties':
+                {
+                    'deleted_subjects': {'type':'integer', required: true}
+                }
+            }";
+            JSchema schema = JSchema.Parse(successJsonSchema);
+            var result = JObject.Parse(await request);
+            ValidateMethodOutput(schema, result);
+            return result.Value<int>("deleted_subjects");
+        }
+        public async Task<bool> AddUserAsync(string user, string pass, int pr_level)
+        {
+            string url = $"/addUser.php";
+            JObject contentJObject = new JObject();
+            contentJObject.Add("user", user);
+            contentJObject.Add("pass", pass);
+            contentJObject.Add("pr", pr_level);
+            string contentString = contentJObject.ToString();
+            StringContent content = new StringContent(contentString, Encoding.UTF8, "application/json");
+            var request = PostRequestAsync(url, content);
+            string successJsonSchema =
+            @"{
+                'type':'object',
+                'properties':
+                {
+                    'added': {'type':'boolean', required: true}
+                }
+            }";
+            JSchema schema = JSchema.Parse(successJsonSchema);
+            var result = JObject.Parse(await request);
+            ValidateMethodOutput(schema, result);
+            return result.Value<bool>("added");
+        }
+        public async Task<bool> DeleteUserAsync(string user)
+        {
+            string url = $"/deleteUser.php?user={user}";
+            var request = GetRequestAsync(url);
+            string successJsonSchema =
+            @"{
+                'type':'object',
+                'properties':
+                {
+                    'deleted': {'type':'boolean', required: true}
+                }
+            }";
+            JSchema schema = JSchema.Parse(successJsonSchema);
+            var result = JObject.Parse(await request);
+            ValidateMethodOutput(schema, result);
+            return result.Value<bool>("added");
+        }
+        private T ValidateMethodOutput<T>(JSchema schema, JContainer result)
         {
             
             if (result.IsValid(schema))
@@ -203,7 +280,6 @@ namespace SchoolBotAPI
                 
                 string errorJsonSchema = 
                 @"{
-                    'description':'Error',
                     'type':'object',
                     'properties':
                     {
@@ -214,7 +290,7 @@ namespace SchoolBotAPI
                 JSchema errorSchema = JSchema.Parse(errorJsonSchema);
                 if (result.IsValid(errorSchema))
                 {
-                    handleError((string)result.GetValue("error"), (int)result.GetValue("errorcode"));
+                    handleError((string)((JObject)result).GetValue("error"), (int)((JObject)result).GetValue("errorcode"));
                     return default(T);
                 }
                 else
@@ -223,7 +299,7 @@ namespace SchoolBotAPI
                 }
             }
         }
-        private void ValidateMethodOutput(JSchema schema, JObject result)
+        private void ValidateMethodOutput(JSchema schema, JContainer result)
         {
             
             if (!result.IsValid(schema))
@@ -231,7 +307,6 @@ namespace SchoolBotAPI
                 
                 string errorJsonSchema = 
                 @"{
-                    'description':'Error',
                     'type':'object',
                     'properties':
                     {
@@ -242,7 +317,7 @@ namespace SchoolBotAPI
                 JSchema errorSchema = JSchema.Parse(errorJsonSchema);
                 if (result.IsValid(errorSchema))
                 {
-                    handleError((string)result.GetValue("error"), (int)result.GetValue("errorcode"));
+                    handleError((string)((JObject)result).GetValue("error"), (int)((JObject)result).GetValue("errorcode"));
                     
                 }
                 else
@@ -251,7 +326,6 @@ namespace SchoolBotAPI
                 }
             }
         }
-
         public async Task AuthAsync(string username, string password)
         {
             var content = new FormUrlEncodedContent(new[]
@@ -274,6 +348,7 @@ namespace SchoolBotAPI
             JSchema schema = JSchema.Parse(successJsonSchema);
             JObject result = JObject.Parse(await request);
             key = ValidateMethodOutput<Dictionary<string, string>>(schema, result)["key"];
+            client.DefaultRequestHeaders.Add("key", key);
         }
 
         private static void handleError(string error, int errorcode)
@@ -288,6 +363,7 @@ namespace SchoolBotAPI
                 case 4:
                 case 5:
                 case 6:
+                case 9:
                     throw new AuthenticationException(error);
                 case 7:
                     throw new MissingArgumentException(error);
